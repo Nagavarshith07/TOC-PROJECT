@@ -47,7 +47,7 @@ This project uses only vanilla web technologies and does not require any install
 Clone the repository:
 
 ```bash
-git clone <your-repository-url>
+git clone <https://github.com/Nagavarshith07/TOC-PROJECT/tree/main>
    ```
 2. Open `index.html` in your preferred web browser.
 
