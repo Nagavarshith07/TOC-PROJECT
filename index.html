@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-Tape Turing Machine Simulator</title>
+  <meta name="description"
+    content="A professional 3-Tape Deterministic Turing Machine Simulator for Theory of Computation — supports Palindrome Checking, String Copying, and Binary Addition." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <header id="main-header">
+    <div class="header-left">
+      <div class="header-logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="#2563eb" />
+          <rect x="6" y="10" width="20" height="4" rx="2" fill="white" opacity="0.9" />
+          <rect x="6" y="18" width="20" height="4" rx="2" fill="white" opacity="0.6" />
+          <circle cx="14" cy="12" r="2.5" fill="#60a5fa" />
+          <circle cx="20" cy="20" r="2.5" fill="#93c5fd" />
+        </svg>
+      </div>
+      <div class="header-title-group">
+        <h1 class="header-title">Multi-Tape Turing Machine Simulator</h1>
+        <span class="header-subtitle">3-Tape Deterministic TM · Theory of Computation</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-badge-group">
+        <div class="header-stat">
+          <span class="stat-label">Current State</span>
+          <span class="stat-value" id="hdr-current-state">—</span>
+        </div>
+        <div class="header-stat">
+          <span class="stat-label">Step</span>
+          <span class="stat-value" id="hdr-step-counter">0</span>
+        </div>
+        <div class="header-stat">
+          <span class="stat-label">Mode</span>
+          <span class="stat-value" id="hdr-exec-mode">IDLE</span>
+        </div>
+        <div id="hdr-status-badge" class="status-badge badge-idle">IDLE</div>
+      </div>
+    </div>
+  </header>
+
+
+  <div class="app-layout">
+
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+          </svg>
+          Problem
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="problem-select">Simulation Type</label>
+          <select id="problem-select" class="form-select">
+            <option value="palindrome">Palindrome Checker</option>
+            <option value="copy">String Copying</option>
+            <option value="binary">Binary Addition</option>
+          </select>
+        </div>
+        <div class="form-group" id="input-group-main">
+          <label class="form-label" for="input-string">Input String</label>
+          <input type="text" id="input-string" class="form-input" placeholder="e.g. abba" autocomplete="off"
+            spellcheck="false" />
+          <span class="form-hint" id="input-hint">Letters a–z allowed</span>
+        </div>
+        <div class="form-group" id="input-group-b" style="display:none;">
+          <label class="form-label" for="input-string-b">Second Operand</label>
+          <input type="text" id="input-string-b" class="form-input" placeholder="e.g. 101" autocomplete="off"
+            spellcheck="false" />
+          <span class="form-hint">Binary digits only (0/1)</span>
+        </div>
+        <div id="input-error" class="input-error" style="display:none;"></div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          Controls
+        </div>
+        <div class="btn-group-vertical">
+          <button id="btn-init" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path
+                d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" />
+            </svg>
+            Initialize
+          </button>
+          <button id="btn-step" class="btn btn-secondary" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="5 3 19 12 5 21 5 3" />
+              <line x1="22" y1="3" x2="22" y2="21" />
+            </svg>
+            Step Run
+          </button>
+          <button id="btn-auto" class="btn btn-secondary" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            Auto Run
+          </button>
+          <button id="btn-reset" class="btn btn-danger">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="1 4 1 10 7 10" />
+              <path d="M3.51 15a9 9 0 1 0 .49-5.33" />
+            </svg>
+            Reset
+          </button>
+        </div>
+        <div class="form-group" style="margin-top:16px;">
+          <label class="form-label">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            Speed: <span id="speed-label">Medium</span>
+          </label>
+          <input type="range" id="speed-slider" class="speed-slider" min="1" max="5" value="3" />
+          <div class="speed-marks">
+            <span>Slow</span><span>Fast</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          Machine Info
+        </div>
+        <div class="info-grid">
+          <div class="info-row"><span class="info-key">Start State</span><span class="info-val"
+              id="sb-start-state">q0</span></div>
+          <div class="info-row"><span class="info-key">Current State</span><span class="info-val highlight-blue"
+              id="sb-current-state">—</span></div>
+          <div class="info-row"><span class="info-key">Accept State</span><span class="info-val highlight-green"
+              id="sb-accept-state">qAccept</span></div>
+          <div class="info-row"><span class="info-key">Reject State</span><span class="info-val highlight-red"
+              id="sb-reject-state">qReject</span></div>
+        </div>
+        <div class="machine-status-wrap">
+          <div id="machine-status" class="machine-status status-ready">READY</div>
+        </div>
+      </div>
+    </aside>
+
+
+    <main class="main-panel" id="main-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <rect x="2" y="3" width="20" height="4" rx="2" />
+            <rect x="2" y="10" width="20" height="4" rx="2" />
+            <rect x="2" y="17" width="20" height="4" rx="2" />
+          </svg>
+          Tape Visualization
+        </div>
+        <span class="panel-subtitle" id="panel-problem-label">Select a problem and initialize</span>
+      </div>
+
+
+      <div class="tape-card" id="tape-card-1">
+        <div class="tape-card-header">
+          <div class="tape-label-group">
+            <span class="tape-number">T1</span>
+            <span class="tape-name">Input Tape</span>
+          </div>
+          <div class="tape-head-indicator">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L2 22h20z" />
+            </svg>
+            Head: <span id="tape1-head-pos">0</span>
+          </div>
+        </div>
+        <div class="tape-scroll-wrapper">
+          <div class="tape-track" id="tape1-track"></div>
+        </div>
+      </div>
+
+
+      <div class="tape-card" id="tape-card-2">
+        <div class="tape-card-header">
+          <div class="tape-label-group">
+            <span class="tape-number">T2</span>
+            <span class="tape-name" id="tape2-label">Working Tape</span>
+          </div>
+          <div class="tape-head-indicator">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L2 22h20z" />
+            </svg>
+            Head: <span id="tape2-head-pos">0</span>
+          </div>
+        </div>
+        <div class="tape-scroll-wrapper">
+          <div class="tape-track" id="tape2-track"></div>
+        </div>
+      </div>
+
+
+      <div class="tape-card" id="tape-card-3">
+        <div class="tape-card-header">
+          <div class="tape-label-group">
+            <span class="tape-number">T3</span>
+            <span class="tape-name" id="tape3-label">Output Tape</span>
+          </div>
+          <div class="tape-head-indicator">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L2 22h20z" />
+            </svg>
+            Head: <span id="tape3-head-pos">0</span>
+          </div>
+        </div>
+        <div class="tape-scroll-wrapper">
+          <div class="tape-track" id="tape3-track"></div>
+        </div>
+      </div>
+
+
+      <div id="result-banner" class="result-banner" style="display:none;"></div>
+    </main>
+
+
+    <aside class="right-panel" id="right-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          Execution Details
+        </div>
+      </div>
+
+      <div class="exec-cards">
+        <div class="exec-card">
+          <div class="exec-card-icon icon-state">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10" />
+            </svg>
+          </div>
+          <div class="exec-card-body">
+            <div class="exec-card-label">Current State</div>
+            <div class="exec-card-value" id="rp-current-state">—</div>
+          </div>
+        </div>
+        <div class="exec-card">
+          <div class="exec-card-icon icon-read">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </div>
+          <div class="exec-card-body">
+            <div class="exec-card-label">Read Symbols</div>
+            <div class="exec-card-value mono" id="rp-read-sym">—</div>
+          </div>
+        </div>
+        <div class="exec-card">
+          <div class="exec-card-icon icon-write">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+            </svg>
+          </div>
+          <div class="exec-card-body">
+            <div class="exec-card-label">Written Symbols</div>
+            <div class="exec-card-value mono" id="rp-write-sym">—</div>
+          </div>
+        </div>
+        <div class="exec-card">
+          <div class="exec-card-icon icon-move">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </div>
+          <div class="exec-card-body">
+            <div class="exec-card-label">Directions</div>
+            <div class="exec-card-value mono" id="rp-direction">—</div>
+          </div>
+        </div>
+        <div class="exec-card">
+          <div class="exec-card-icon icon-next">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+          </div>
+          <div class="exec-card-body">
+            <div class="exec-card-label">Next State</div>
+            <div class="exec-card-value" id="rp-next-state">—</div>
+          </div>
+        </div>
+        <div class="exec-card">
+          <div class="exec-card-icon icon-step">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+          </div>
+          <div class="exec-card-body">
+            <div class="exec-card-label">Step Number</div>
+            <div class="exec-card-value" id="rp-step-num">0</div>
+          </div>
+        </div>
+        <div class="exec-card">
+          <div class="exec-card-icon icon-mode">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
+            </svg>
+          </div>
+          <div class="exec-card-body">
+            <div class="exec-card-label">Execution Mode</div>
+            <div class="exec-card-value" id="rp-exec-mode">IDLE</div>
+          </div>
+        </div>
+      </div>
+
+
+    </aside>
+
+  </div>
+  <section class="transition-section">
+    <div class="transition-header">
+      <div class="panel-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M9 11l3 3L22 4" />
+          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+        </svg>
+        Transition Table
+      </div>
+      <button id="btn-clear-log" class="btn-sm">Clear Log</button>
+    </div>
+    <div class="transition-table-wrap" id="transition-table-wrap">
+      <table class="transition-table" id="transition-table">
+        <thead>
+          <tr>
+            <th>Step</th>
+            <th>State</th>
+            <th>Read</th>
+            <th>Write</th>
+            <th>Direction</th>
+            <th>Next State</th>
+          </tr>
+        </thead>
+        <tbody id="transition-tbody">
+          <tr class="empty-row">
+            <td colspan="6">No transitions yet. Initialize and run the simulation.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
